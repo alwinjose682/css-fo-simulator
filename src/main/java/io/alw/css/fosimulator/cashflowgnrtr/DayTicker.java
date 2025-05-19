@@ -1,6 +1,6 @@
 package io.alw.css.fosimulator.cashflowgnrtr;
 
-import io.alw.css.fosimulator.VT;
+import io.alw.css.fosimulator.CssTaskExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +17,10 @@ public final class DayTicker extends Stoppable {
     private AtomicLong day;
     private final long intervalSecondsBeforeFirstTick;
     private final long graceSecondsForGeneratorsToStart;
-    private final VT vt;
+    private final CssTaskExecutor cssTaskExecutor;
     private boolean startedDayTicker;
 
-    public DayTicker(long tickerIntervalSeconds, long intervalSecondsBeforeFirstTick, long graceSecondsForGeneratorsToStart, VT vt) {
+    public DayTicker(long tickerIntervalSeconds, long intervalSecondsBeforeFirstTick, long graceSecondsForGeneratorsToStart, CssTaskExecutor cssTaskExecutor) {
         if (tickerIntervalSeconds < 10) {
             throw new RuntimeException("The day 'tickerIntervalSeconds' must be atleast 10 seconds");
         }
@@ -28,7 +28,7 @@ public final class DayTicker extends Stoppable {
         this.day = new AtomicLong(firstDay);
         this.intervalSecondsBeforeFirstTick = intervalSecondsBeforeFirstTick * 1_000;
         this.graceSecondsForGeneratorsToStart = graceSecondsForGeneratorsToStart * 1_000;
-        this.vt = vt;
+        this.cssTaskExecutor = cssTaskExecutor;
         this.startedDayTicker = false;
     }
 
@@ -37,7 +37,7 @@ public final class DayTicker extends Stoppable {
     void start() {
         synchronized (this) {
             if (!startedDayTicker) {
-                vt.submit(this::startTicker);
+                cssTaskExecutor.submit(this::startTicker);
                 startedDayTicker = true;
                 log.info("Started day ticker. currentDay: {}, tickerInterval: {} sec, intervalSecondsBeforeFirstTick: {} sec, graceTimeForGeneratorsToStart: {} sec", day(), tickerInterval / 1000L, intervalSecondsBeforeFirstTick / 1000L, graceSecondsForGeneratorsToStart / 1000L);
             }

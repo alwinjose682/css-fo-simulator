@@ -51,7 +51,7 @@ public final class TemporaryGenericDefinition extends CashMessageDefinition {
         bdr
                 .valueDate(getRndmValueDate(1000))
                 .tradeLinks(null)
-                .payOrRecieve(rndm.nextBoolean() ? PayOrRecieve.PAY : PayOrRecieve.RECEIVE)
+                .payOrReceive(rndm.nextBoolean() ? PayOrReceive.PAY : PayOrReceive.RECEIVE)
                 .amount(BigDecimal.valueOf(rndm.nextDouble(2, 52458)))
         ;
 

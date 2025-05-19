@@ -57,7 +57,7 @@ public final class FxDefinition extends CashMessageDefinition {
                 .currCode(currCode)
                 .secondaryLedgerAccount(refDataService.counterpartyMappedSecondarySla(entityCode, currCode, counterpartyCode))
                 .tradeLinks(List.of(new TradeLink(tradeLink_counterSide, String.valueOf(fx1.cashflowID()))))
-                .payOrRecieve(fx1.payOrRecieve() == PayOrRecieve.RECEIVE ? PayOrRecieve.PAY : PayOrRecieve.RECEIVE)
+                .payOrReceive(fx1.payOrReceive() == PayOrReceive.RECEIVE ? PayOrReceive.PAY : PayOrReceive.RECEIVE)
                 .amount(BigDecimal.valueOf(rndm.nextDouble(2, 95036))); // TODO and NOTE: The amount of the other side of FX trade is not calculated based on rate. It is just a random number which is incorrect.
         // bookCode and counterBookCode are not changed as they are dummy values as of now
 
@@ -75,7 +75,7 @@ public final class FxDefinition extends CashMessageDefinition {
         bdr
                 .valueDate(getRndmValueDate(1000))
                 .tradeLinks(List.of(new TradeLink(tradeLink_counterSide, String.valueOf(counterSideCashflowId))))
-                .payOrRecieve(rndm.nextBoolean() ? PayOrRecieve.PAY : PayOrRecieve.RECEIVE)
+                .payOrReceive(rndm.nextBoolean() ? PayOrReceive.PAY : PayOrReceive.RECEIVE)
                 .amount(BigDecimal.valueOf(rndm.nextDouble(2, 95036)))
         ;
 

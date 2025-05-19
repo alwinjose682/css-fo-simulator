@@ -3,8 +3,8 @@ package io.alw.css.fosimulator.cashflowgnrtr;
 import io.alw.css.domain.cashflow.FoCashMessage;
 import io.alw.css.domain.cashflow.TradeType;
 import io.alw.css.domain.cashflow.TransactionType;
-import io.alw.css.fosimulator.FoCashMessageConsumer;
-import io.alw.css.fosimulator.VT;
+import io.alw.css.fosimulator.CashMessagePublisher;
+import io.alw.css.fosimulator.CssTaskExecutor;
 import io.alw.css.fosimulator.definition.FxDefinition;
 import io.alw.css.fosimulator.definition.TemporaryGenericDefinition;
 import io.alw.css.fosimulator.model.Entity;
@@ -30,20 +30,20 @@ public final class CashflowGeneratorHandler {
 
     private final CashflowGeneratorProperties cashflowGeneratorProperties;
     private final CashMessageDefinitionProperties cashMessageDefinitionProperties;
-    private final FoCashMessageConsumer foCashMessageConsumer;
+    private final CashMessagePublisher cashMessagePublisher;
     private final RefDataService refDataService;
     private final DayTicker dayTicker;
-    private final VT vt;
+    private final CssTaskExecutor cssTaskExecutor;
 
-    public CashflowGeneratorHandler(CashflowGeneratorProperties cashflowGeneratorProperties, CashMessageDefinitionProperties cashMessageDefinitionProperties, FoCashMessageConsumer foCashMessageConsumer, RefDataService refDataService, DayTicker dayTicker, VT vt) {
+    public CashflowGeneratorHandler(CashflowGeneratorProperties cashflowGeneratorProperties, CashMessageDefinitionProperties cashMessageDefinitionProperties, CashMessagePublisher cashMessagePublisher, RefDataService refDataService, DayTicker dayTicker, CssTaskExecutor cssTaskExecutor) {
         this.cashflowGeneratorProperties = cashflowGeneratorProperties;
         this.cashMessageDefinitionProperties = cashMessageDefinitionProperties;
-        this.foCashMessageConsumer = foCashMessageConsumer;
+        this.cashMessagePublisher = cashMessagePublisher;
         this.refDataService = refDataService;
         this.dayTicker = dayTicker;
         this.activeHandlerOperation = new AtomicBoolean(false);
         this.generatorMap = new ConcurrentHashMap<>();
-        this.vt = vt;
+        this.cssTaskExecutor = cssTaskExecutor;
     }
 
     private boolean beginHandlerOperation() {
@@ -82,9 +82,9 @@ public final class CashflowGeneratorHandler {
                         Supplier<List<FoCashMessage>> cashMessageSupplier = createCashMessageSupplier(transactionType, tradeType, entity);
                         // Create the cashflowGenerator
                         GeneratorDetail generatorDetail = new GeneratorDetail(key, generatorSleepDurationSeconds);
-                        CashflowGenerator cashflowGenerator = create(generatorDetail, cashMessageSupplier, foCashMessageConsumer);
+                        CashflowGenerator cashflowGenerator = create(generatorDetail, cashMessageSupplier, cashMessagePublisher);
                         // Start the cashflowGenerator
-                        vt.submit(cashflowGenerator);
+                        cssTaskExecutor.submit(cashflowGenerator);
                         startedGenerators.add(generatorDetail);
                     } catch (Exception e) {
                         startedGenerators.stream().map(GeneratorDetail::generatorKey).forEach(this::stop);
@@ -124,8 +124,8 @@ public final class CashflowGeneratorHandler {
     /// Creates a new generator and adds to the list of the same type of generators.
     /// Concurrent Safe. Performs this computation atomically. generatorMap is ConcurrentHashMap
     /// This method does NOT change the 'begin' or 'end' handler operation state
-    private CashflowGenerator create(GeneratorDetail generatorDetail, Supplier<List<FoCashMessage>> cashMessageSupplier, FoCashMessageConsumer foCashMessageConsumer) {
-        CashflowGenerator newGenerator = new CashflowGenerator(generatorDetail, cashMessageSupplier, foCashMessageConsumer);
+    private CashflowGenerator create(GeneratorDetail generatorDetail, Supplier<List<FoCashMessage>> cashMessageSupplier, CashMessagePublisher cashMessagePublisher) {
+        CashflowGenerator newGenerator = new CashflowGenerator(generatorDetail, cashMessageSupplier, cashMessagePublisher);
         generatorMap.compute(generatorDetail.generatorKey(), (k, v) -> {
             if (v == null) {
                 List<CashflowGenerator> generators = new ArrayList<>();
@@ -185,7 +185,7 @@ public final class CashflowGeneratorHandler {
         generator.stop();
 
         // Spawn a new thread that waits for the status that says there are no pending tasks for the thread and will be stopped
-        vt.submit(() -> {
+        cssTaskExecutor.submit(() -> {
             int waitTimeMinutes = 1;
             boolean stopped = false;
             LocalDateTime startTime = LocalDateTime.now();
