@@ -3,7 +3,7 @@ package io.alw.css.fosimulator.model.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
-@ConfigurationProperties("kafka.topic")
+@ConfigurationProperties("app.kafka.topic")
 public class KafkaTopicProperties {
     private final String cashflowOutput;
 

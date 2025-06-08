@@ -11,6 +11,7 @@ import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Mapper
@@ -45,11 +46,11 @@ public interface FoCashMessageAvroMapper {
 
     @Named("mapJavaTimeDateToString")
     static String mapJavaTimeDateToString(LocalDate date) {
-        return date != null ? String.valueOf(date) : null;
+        return date != null ? date.format(DateTimeFormatter.ISO_DATE) : null;
     }
 
     @Named("mapStringToJavaTimeDate")
     static LocalDate mapStringToJavaTimeDate(String strDate) {
-        return strDate != null ? LocalDate.parse(strDate) : null;
+        return strDate != null ? LocalDate.parse(strDate, DateTimeFormatter.ISO_DATE) : null;
     }
 }
