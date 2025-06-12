@@ -42,11 +42,10 @@ public class CashMessagePublisher implements Consumer<List<FoCashMessage>> {
                 .whenCompleteAsync((result, e) -> {
                     if (e == null) {
                         RecordMetadata recordMetadata = result.getRecordMetadata();
-                        log.info("Successfully sent cash message to topic: {}, partition: {}, offset: {}", outputTopic, recordMetadata.partition(), recordMetadata.offset());
+                        log.info("Published cash message[{}] to topic: {}, partition: {}, offset: {}", key, outputTopic, recordMetadata.partition(), recordMetadata.offset());
                     } else {
-                        log.error("An error occurred when sending to kafka topic: {}. Message: {}", outputTopic, avroMsg);
+                        log.error("An error occurred when publishing cash message[{}] to kafka topic: {}. Message: {}", key, outputTopic, avroMsg);
                     }
                 }, cssTaskExecutor.executor());
-
     }
 }
