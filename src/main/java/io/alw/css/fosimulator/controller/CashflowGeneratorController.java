@@ -21,24 +21,24 @@ public class CashflowGeneratorController {
     }
 
     @PostMapping(value = "start/{generatorKey}")
-    public ResponseEntity<CashflowGeneratorHandlerOutcome> startDataGeneration(@PathVariable String generatorKey) {
+    public ResponseEntity<String> startDataGeneration(@PathVariable String generatorKey) {
         final CashflowGeneratorHandlerOutcome outcome;
         if (generatorKey.equalsIgnoreCase(ALL_GENERATORS_KEY)) {
             outcome = cashflowGeneratorService.startDataGeneration();
         } else {
             outcome = cashflowGeneratorService.startGenerator(generatorKey);
         }
-        return new ResponseEntity<>(outcome, HttpStatus.OK);
+        return new ResponseEntity<>(outcome.toString(), HttpStatus.OK);
     }
 
     @PostMapping(value = "stop/{generatorKey}")
-    public ResponseEntity<List<CashflowGeneratorHandlerOutcome>> stopDataGeneration(@PathVariable String generatorKey) {
+    public ResponseEntity<String> stopDataGeneration(@PathVariable String generatorKey) {
         final List<CashflowGeneratorHandlerOutcome> outcome;
         if (generatorKey.equalsIgnoreCase(ALL_GENERATORS_KEY)) {
             outcome = cashflowGeneratorService.stopDataGeneration();
         } else {
             outcome = List.of(cashflowGeneratorService.stopGenerator(generatorKey));
         }
-        return ResponseEntity.ok(outcome);
+        return ResponseEntity.ok(outcome.toString());
     }
 }
